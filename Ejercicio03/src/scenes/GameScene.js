@@ -20,6 +20,7 @@ class GameScene extends Phaser.Scene{
         this.createPlayer();
         this.createFire();
         this.createGorilla();
+        this.createButtons();
         this.elapsed = 0;
         this.barrelFrequency = this.levelData.barrelFrequency * 1000;
         this.barrelSpeed = this.levelData.barrelSpeed;
@@ -29,6 +30,48 @@ class GameScene extends Phaser.Scene{
         this.physics.add.collider(this.platforms,this.barrels);
         this.physics.add.collider(this.player,this.platforms);
         this.physics.add.collider(this.gorilla,this.platforms);
+    }
+    createButtons(){
+        this.playerLeft = false;
+        this.playerRight = false;
+        this.playerJump = false;
+        this.actionButton = this.add.sprite(0,0,'actionButton');
+        this.actionButton.setInteractive();
+        this.actionButton.x = this.game.config.width - this.actionButton.width;
+        this.actionButton.y = this.game.config.height - this.actionButton.height;
+        this.actionButton.on('pointerdown',this.jump,this);
+        this.actionButton.on('pointerup',this.cancelJump,this);
+        this.leftButton = this.add.sprite(0,0,'arrowButton');
+        this.leftButton.x = this.leftButton.width;
+        this.leftButton.y = this.actionButton.y;
+        this.leftButton.setInteractive();
+        this.leftButton.on('pointerdown',this.moveLeft,this);
+        this.leftButton.on('pointerup',this.cancelLeft,this);
+
+        this.rightButton = this.add.sprite(0,0,'arrowButton');
+        this.rightButton.x = this.leftButton.x + this.leftButton.width + 25;
+        this.rightButton.y = this.actionButton.y;
+        this.rightButton.setInteractive();
+        this.rightButton.on('pointerdown',this.moveRight,this);
+        this.rightButton.on('pointerup',this.cancelRight,this);
+    }
+    moveRight(){
+        this.playerRight = true;
+    }
+    cancelRight(){
+        this.playerRight = false;
+    }
+    moveLeft(){
+        this.playerLeft = true;
+    }
+    cancelLeft(){
+        this.playerLeft = false;
+    }
+    jump(){
+        this.playerJump = true;
+    }
+    cancelJump(){
+        this.playerJump = false;
     }
     createGorilla(){
         this.gorilla = this.physics.add.sprite(0,0,'gorilla');
@@ -88,18 +131,18 @@ class GameScene extends Phaser.Scene{
             this.elapsed = 0;
             this.createBarrel();
         }
-        if(this.cursors.up.isDown &&
+        if((this.cursors.up.isDown || this.playerJump) &&
             this.player.body.touching.down
         ){
             this.player.setVelocityY(-700);
             this.player.play("jump");
         }
-        if(this.cursors.left.isDown){
+        if(this.cursors.left.isDown || this.playerLeft){
             this.player.setVelocityX(-160);
             this.player.setScale(1,1);
             this.player.body.setOffset(0,0);
             this.player.play("run");
-        }else if(this.cursors.right.isDown){
+        }else if(this.cursors.right.isDown || this.playerRight){
             this.player.setVelocityX(160);
             this.player.setScale(-1,1);
             this.player.body.setOffset(this.player.width,0);
