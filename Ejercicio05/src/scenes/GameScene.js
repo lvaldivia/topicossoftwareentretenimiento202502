@@ -50,7 +50,7 @@ class GameScene extends Phaser.Scene{
     }
     iniEnemies(){
         this.enemies = this.add.group({runChildUpdate:true});
-        this.enemyBullets = this.add.group();
+        this.enemyBullets = this.add.group({runChildUpdate:true});
     }
     createPlayerBullet(){
         let bullet = this.playerBullets.getFirstDead();
@@ -98,7 +98,7 @@ class GameScene extends Phaser.Scene{
         }
     }
     createEnemy(x,y,key,config){
-        let enemy = new Enemy(this,x,y,key,config);
+        let enemy = new Enemy(this,x,y,key,config,this.enemyBullets);
         this.enemies.add(enemy);
     }
     hitEnemy(bullet,enemy){

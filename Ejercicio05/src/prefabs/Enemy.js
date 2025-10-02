@@ -1,5 +1,7 @@
+import EnemyBullet from "./EnemyBullet";
+
 class Enemy extends Phaser.Physics.Arcade.Sprite{
-    constructor(scene,x,y,key,config){
+    constructor(scene,x,y,key,config,enemyBullets){
         super(scene,x,y,key);
         this.setOrigin(0.5);
         scene.add.existing(this);
@@ -8,14 +10,30 @@ class Enemy extends Phaser.Physics.Arcade.Sprite{
         this.speedX = config.speedX;
         this.speedY = config.speedY;
         this.health = config.health;
+        this.enemyBullets = enemyBullets;
         this.body.setVelocity(this.speedX,this.speedY);
         this.startShooting();
     }
     startShooting(){
         this.shoot();
+        this.shootingTimer = this.scene.time.addEvent({
+            delay:2000,
+            callbackScope:this,
+            callback:this.shoot,
+            loop:true
+        });
     }
     shoot(){
-        //dispara bullet
+        let bullet = this.enemyBullets.getFirstDead();
+        if(!bullet){
+            bullet = new EnemyBullet(this.scene,this.x,this.y);
+            this.enemyBullets.add(bullet);
+        }else{
+            bullet.setPosition(this.x.x,this.y);
+            bullet.setActive(true);
+            bullet.setVisible(true);
+        }
+        bullet.body.setVelocityY(100);
     }
     update(){
         if(this.x < 0.05 * this.scene.game.config.width){
@@ -31,6 +49,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite{
         if(this.health<=0){
             this.createExplosion();
             this.destroyEnemy();
+            this.shootingTimer.remove();
         }
     }
     createExplosion(){
