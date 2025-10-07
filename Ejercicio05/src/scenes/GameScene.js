@@ -6,6 +6,16 @@ class GameScene extends Phaser.Scene{
     constructor(){
         super('GameScene')
     }
+    init(level){
+        console.log('level que viene '+level.level);
+        this.currentLevel = level.level || 1;
+        console.log('level que asgnamos y cargamos '+this.currentLevel);
+        /*this.currentLevel = 1;
+        if(localStorage.hasOwnProperty('currentLevel')){
+            this.currentLevel = localStorage.currentLevel;
+        }
+        console.log(this.currentLevel);*/
+    }
     create(){
         this.background = this.add.tileSprite(
             0,0,this.game.config.width,
@@ -24,6 +34,9 @@ class GameScene extends Phaser.Scene{
         this.loop.play();
         this.physics.add.overlap(this.playerBullets,this.enemies,
             this.hitEnemy,null,this);
+        this.physics.add.overlap(this.player,this.enemyBullets,
+            this.hitPlayer,null,this);
+        this.createHUD();
     }
     initPlayer(){
         this.player = 
@@ -41,11 +54,26 @@ class GameScene extends Phaser.Scene{
             loop: true
         });
     }
+    createHUD(){
+        this.score = 0;
+        let style = {
+            fontFamily:'Arial',
+            fontSize:'64px',
+            color: '#FFFFFF'
+        };
+        this.enemyText = this.add.text(0,0,'Total Enemy',style);
+        this.enemyText.text = 'Total Enemies '+this.totalEnemies;
+        this.enemyText.setDepth(9999);
+        this.scoreText = this.add.text(0,0,'Total Score '+this.score,style);
+        this.scoreText.setDepth(9999);
+        this.scoreText.x = this.game.config.width - this.scoreText.width;
+    }
     loadLevel(){
-        this.currentLevel = 1;
+        
         this.currentIndexEnemy = 0;
         this.levelData 
             = JSON.parse(this.cache.text.get('level'+this.currentLevel));
+        this.totalEnemies = this.levelData.enemies.length;
         this.scheduleNextEnemy();
     }
     iniEnemies(){
@@ -76,7 +104,11 @@ class GameScene extends Phaser.Scene{
             this.player.body.setVelocityX(this.direction* this.player_speed);
         }
     }
-
+    updateHUD(){
+        this.enemyText.text = 'Total Enemies '+this.totalEnemies;
+        this.scoreText.x = this.game.config.width - this.scoreText.width;
+        this.scoreText.text = 'Total Score '+this.score;
+    }
     scheduleNextEnemy(){
         let nextEnemy = this.levelData.enemies[this.currentIndexEnemy];
         if(nextEnemy){
@@ -102,8 +134,30 @@ class GameScene extends Phaser.Scene{
         this.enemies.add(enemy);
     }
     hitEnemy(bullet,enemy){
-        bullet.destroy();
+        bullet.kill();
         enemy.getHit(1);
+        if(enemy.getHealth() <=0){
+            this.totalEnemies--;
+            this.score += enemy.getScale();
+            this.updateHUD();
+        }
+        if(this.totalEnemies<=0){
+            this.levelUp();
+        }
+    }
+    levelUp(){
+        this.currentLevel++;
+        if(this.currentLevel >3){
+            this.currentLevel = 1;
+        }
+        this.scene.stop('GameScene');
+        this.scene.start('GameScene', { level: this.currentLevel });
+        //localStorage.currentLevel = this.currentLevel;
+        //this.scene.stop('GameScene');
+        //this.scene.start('GameScene');
+    }
+    hitPlayer(player,bullet){
+        bullet.kill();
     }
 }
 export default GameScene

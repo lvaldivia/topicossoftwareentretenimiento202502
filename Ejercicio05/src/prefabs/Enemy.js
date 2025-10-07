@@ -43,6 +43,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite{
             this.x = 0.95 * this.scene.game.config.width - 2;
             this.body.velocity.x *=-1;
         }
+        if(this.y > this.scene.game.config.height){
+            this.destroyEnemy();
+        }
     }
     getHit(damage){
         this.health-=damage;
@@ -51,6 +54,12 @@ class Enemy extends Phaser.Physics.Arcade.Sprite{
             this.destroyEnemy();
             this.shootingTimer.remove();
         }
+    }
+    getHealth(){
+        return this.health;
+    }
+    getScale(){
+        return this.scale;
     }
     createExplosion(){
         let particle = this.scene.add.particles(

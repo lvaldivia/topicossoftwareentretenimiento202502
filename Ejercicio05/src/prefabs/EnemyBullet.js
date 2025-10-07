@@ -7,10 +7,13 @@ class EnemyBullet extends Phaser.Physics.Arcade.Sprite{
     }
     update(){
         if(this.y > this.scene.game.config.height){
-            this.setActive(false);
-            this.setVisible(false);
-            this.body.stop();
+            this.kill();
         }
+    }
+    kill(){
+        this.setActive(false);
+        this.setVisible(false);
+        this.body.stop();
     }
 }
 

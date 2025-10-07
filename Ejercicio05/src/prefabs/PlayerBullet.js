@@ -7,11 +7,15 @@ class PlayerBullet extends Phaser.Physics.Arcade.Sprite{
     }
     update(){
         if(this.y < 0){
-            this.setActive(false);
-            this.setVisible(false);
-            this.body.stop();
+            this.kill();
         }
     }
+    kill(){
+        this.setActive(false);
+        this.setVisible(false);
+        this.body.stop();
+    }
+
 }
 
 export default PlayerBullet;
