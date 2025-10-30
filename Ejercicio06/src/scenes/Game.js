@@ -9,9 +9,9 @@ class GameScene extends Phaser.Scene{
         this.setDefaults();
     }
     setDefaults(){
-        this.floorPool = this.add.group();
-        this.platformPool = this.add.group();
-        this.coinsPool = this.add.group();
+        this.floorPool = this.add.group({ runChildUpdate: false });
+        this.platformPool = this.add.group({ runChildUpdate: false });
+        this.coinsPool = this.add.group({ runChildUpdate: false });
         this.maxJumpDistance = 120;
         this.cursors = this.input.keyboard.createCursorKeys();
         this.myCoins = 0;
@@ -48,17 +48,27 @@ class GameScene extends Phaser.Scene{
             -this.levelSpeed,this.coinsPool
         );
         this.platformPool.add(this.currentPlatform);
+        this.style = {
+            font:'30px Arial',
+            fill:"#fff"
+        };
+        this.scoreText = this.add.text(0,0,'Score: '+this.myCoins,this.style);
+    }
+    updateScore(){
+        this.scoreText.text = 'Score '+this.myCoins;
     }
     update(){
         this.background.tilePositionX -= this.levelSpeed/100;
-        this.physics.collide(this.hero,this.platformPool);
+        this.physics.collide(this.hero, this.floorPool);
+        this.physics.overlap(this.hero,this.coinsPool,this.collectCoins,null,this);
         if(this.cursors.up.isDown || this.input.activePointer.isDown){
             this.playerJump();
         }else if(this.cursors.up.isUp || !this.input.activePointer.isDown){
             this.isJumping = false;
         }
 
-        if(this.currentPlatform.getLength() &&
+        if(this.currentPlatform && 
+            this.currentPlatform.getLength()  &&
             this.currentPlatform.getLast(true).getRightCenter().x
              < this.game.config.width){
             this.createPlaform()
@@ -69,6 +79,18 @@ class GameScene extends Phaser.Scene{
                 platform.kill();
             }
         });
+        if(this.hero.getBounds().top > this.game.config.height
+        || this.hero.getBounds().left <=0){
+            this.gameOver();
+        }
+    }
+    collectCoins(hero,coin){
+        coin.setActive(false);
+        coin.setVisible(false);
+        coin.disableBody(true,true);
+        this.myCoins++;
+        this.coinSound.play();
+        this.updateScore();
     }
     playerJump(){
         if(this.hero.body.touching.down){
@@ -126,6 +148,23 @@ class GameScene extends Phaser.Scene{
     }
     loadLevel(){
         this.createPlaform();
+    }
+    gameOver(){
+        this.hero.setActive(false);
+        this.hero.setVisible(false);
+        this.hero.disableBody(true,true);
+        this.showGameOver();
+    }
+    showGameOver(){
+        this.overlay = this.add.rectangle(
+            this.game.config.width / 2,
+            this.game.config.height / 2,
+            50,
+            50,
+            0x6C5CE7 ,
+            0.1
+        );
+        this.overlay.setScrollFactor(0); 
     }
 }
 export default GameScene
