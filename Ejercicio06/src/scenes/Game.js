@@ -159,12 +159,30 @@ class GameScene extends Phaser.Scene{
         this.overlay = this.add.rectangle(
             this.game.config.width / 2,
             this.game.config.height / 2,
-            50,
-            50,
+            this.game.config.width,
+            this.game.config.height,
             0x6C5CE7 ,
             0.1
         );
         this.overlay.setScrollFactor(0); 
+        this.gameOverTexr = this.add.text(
+            this.game.config.width / 2,
+            this.game.config.height / 2 - 40,
+            'Game Over',
+            this.style
+        ).setOrigin(0.5);
+
+        this.restartText = this.add.text(
+            this.game.config.width / 2,
+            this.game.config.height / 2 +20,
+            'Tap to restart',
+            this.style
+        ).setOrigin(0.5);
+
+        this.restartText.setInteractive()
+        this.restartText.on('pointerdown',()=>{
+            this.scene.restart();
+        })
     }
 }
 export default GameScene

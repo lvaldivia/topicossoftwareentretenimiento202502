@@ -75,7 +75,6 @@ class Platform extends Phaser.Physics.Arcade.Group {
         this.alive = false;
 
         this.getChildren().forEach(tile => {
-            // 👇 IMPORTANTE: quitar tile de la plataforma primero
             this.remove(tile);
 
             tile.disableBody(true, true);
