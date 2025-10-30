@@ -23,6 +23,7 @@ class GameScene extends Phaser.Scene{
         this.loadLevel();
         this.initPlayer();
         this.initEnemy();
+        this.initGoal();
     }
 
     loadLevel(){
@@ -57,6 +58,28 @@ class GameScene extends Phaser.Scene{
             this.enemies.add(enemy);
         });
         this.physics.add.collider(this.enemies,this.collisionLayer);
+        this.enemyCollider = this.physics.add.collider(this.hero,this.enemies,
+            this.hitEnemy,null,this
+        );
+    }
+
+    initGoal(){
+        let goalData 
+            = this.findObjectsByType('goal',this.map,'objectsLayer');
+        this.goals = this.add.group();
+        let goal;
+        goalData.forEach((element=>{
+            goal = new Goal(this,element,'goal');
+            this.goals.add(goal);
+        }));
+        this.physics.add.collider(this.goals,this.collisionLayer);
+        this.physics.add.collider(this.hero,this.goals,this.hitGoal,null,this);        
+    }
+    hitGoal(player,goal){
+        this.level++;
+        this.scene.start('GameScene',{
+            'level':this.level
+        })
     }
 
     findObjectsByType(targetType,tilemap,layer){
@@ -85,6 +108,35 @@ class GameScene extends Phaser.Scene{
         }else{
             this.hero.anims.stop();
         }
+    }
+
+    hitEnemy(player,enemy){
+        if(enemy.body.touching.up){
+            enemy.destroy();
+            player.setVelocityY(-this.BOUNCING_SPEED);
+        }else{
+            this.physics.world.separate(player,enemy);
+            if(player.x < enemy.x){
+                player.setVelocityX(-200);
+            }else{
+                player.setVelocityX(200);
+            }
+            this.startBlink();
+        }
+    }
+    startBlink(){
+        this.enemyCollider.active = false;
+        this.tweens.add({
+            targets:this.hero,
+            alpha : 0,
+            duration:100,
+            repeat:10,
+            yoyo:true
+        });
+        this.time.delayedCall(1100,()=>{
+            this.hero.alpha = 1;
+            this.enemyCollider.active = true;
+        });
     }
 }
 export default GameScene
