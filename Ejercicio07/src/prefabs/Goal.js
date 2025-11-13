@@ -7,3 +7,5 @@ class Goal extends Phaser.Physics.Arcade.Sprite{
         this.nextLevel = position.properties.nextLevel;
     }
 }
+
+export default Goal;

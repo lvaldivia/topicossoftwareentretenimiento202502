@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Hero from "../prefabs/Hero";
 import Enemy from "../prefabs/Enemy";
+import Goal from '../prefabs/Goal'
 class GameScene extends Phaser.Scene{
     constructor(){
         super("GameScene");
